@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VolunteerCaus | Local Volunteer Hub</title>
+    <meta name="description" content="Connect with organizations and make a difference in your community.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="container nav-container">
+            <a href="/" class="logo">Volunteer<span class="highlight">Caus</span></a>
+            <div class="nav-links">
+                <a href="opportunities.html" class="nav-link">Opportunities</a>
+                <a href="organizations.html" class="nav-link">Organizations</a>
+                <a href="login.html" class="btn btn-secondary">Log In</a>
+                <a href="register.html" class="btn btn-primary">Join Now</a>
+            </div>
+            <button class="mobile-menu-btn" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container hero-content">
+            <h1 class="hero-title">Make a Real Impact in Your <span class="gradient-text">Local Community</span></h1>
+            <p class="hero-subtitle">Connect with non-profits, find meaningful opportunities, and track your volunteer journey all in one place.</p>
+            <div class="hero-actions">
+                <a href="register.html" class="btn btn-lg btn-primary">Get Started</a>
+                <a href="opportunities.html" class="btn btn-lg btn-outline">Browse Opportunities</a>
+            </div>
+            
+            <div class="hero-stats glass">
+                <div class="stat-item">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Active Volunteers</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">120+</span>
+                    <span class="stat-label">Organizations</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">15k+</span>
+                    <span class="stat-label">Hours Served</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-background">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="features section">
+        <div class="container">
+            <h2 class="section-title">Why Join <span class="highlight">VolunteerCaus</span>?</h2>
+            <div class="features-grid">
+                <div class="feature-card glass-card">
+                    <div class="icon-box">🔍</div>
+                    <h3>Find Opportunities</h3>
+                    <p>Filter by cause, location, and schedule to find the perfect match for your skills.</p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="icon-box">📊</div>
+                    <h3>Track Impact</h3>
+                    <p>Log your hours automatically and see the tangible difference you're making.</p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="icon-box">🤝</div>
+                    <h3>Connect Directly</h3>
+                    <p>Message organizations directly and build lasting relationships with your community.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Opportunities Preview -->
+    <section class="opportunities-preview section bg-darker">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Featured Opportunities</h2>
+                <a href="opportunities.html" class="view-all-link">View All &rarr;</a>
+            </div>
+            <div class="opportunities-grid" id="featured-opportunities">
+                <!-- Dynamic Content via JS -->
+                <div class="loading-state">Loading opportunities...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <a href="/" class="logo">Volunteer<span class="highlight">Caus</span></a>
+                <p>Empowering communities through connection and service.</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-group">
+                    <h4>Platform</h4>
+                    <a href="#">About Us</a>
+                    <a href="#">How it Works</a>
+                    <a href="#">Security</a>
+                </div>
+                <div class="link-group">
+                    <h4>Community</h4>
+                    <a href="#">Blog</a>
+                    <a href="#">Success Stories</a>
+                    <a href="#">Help Center</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 VolunteerCaus. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="js/supabase-client.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

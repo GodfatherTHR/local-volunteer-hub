@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - VolunteerCaus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 1px solid var(--glass-border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .user-profile {
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .nav-item-logout {
+            margin-top: auto;
+            color: #ef4444;
+        }
+
+        .nav-item-logout:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Section Visibility */
+        .dashboard-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .dashboard-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .data-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active,
+        .status-approved {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .status-pending {
+            background: rgba(234, 179, 8, 0.2);
+            color: #facc15;
+        }
+
+        .status-rejected,
+        .status-closed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--glass-border);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--surface-light);
+            border: 1px solid var(--glass-border);
+            color: white;
+            border-radius: var(--radius-sm);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            /* Add mobile toggle later */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="user-profile">
+                <div class="avatar" id="sidebar-avatar">U</div>
+                <div>
+                    <div style="font-weight: 600;" id="user-name">Loading...</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);" id="user-role">...</div>
+                </div>
+            </div>
+
+            <nav id="sidebar-nav">
+                <!-- Injected via JS based on role -->
+            </nav>
+
+            <div class="nav-item nav-item-logout" id="logout-btn">
+                <span>🚪</span> Sign Out
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Volunteer Dashboard -->
+            <div id="volunteer-dashboard" class="dashboard-section">
+                <header
+                    style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Welcome back, <span class="highlight" id="vol-name">User</span>!</h2>
+                    <a href="opportunities.html" class="btn btn-primary">Browse Opportunities</a>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card glass-card">
+                        <span class="stat-value" id="vol-hours">0</span>
+                        <span class="stat-label">Hours Contributed</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-value" id="vol-applications">0</span>
+                        <span class="stat-label">Active Applications</span>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3>My Applications</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Opportunity</th>
+                                <th>Organization</th>
+                                <th>Date Applied</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applications-list">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Organization Dashboard -->
+            <div id="org-dashboard" class="dashboard-section">
+                <header
+                    style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Organization Dashboard</h2>
+                    <button class="btn btn-primary" id="create-post-btn">+ Post Opportunity</button>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card glass-card">
+                        <span class="stat-value" id="org-active-posts">0</span>
+                        <span class="stat-label">Active Listings</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-value" id="org-pending-apps">0</span>
+                        <span class="stat-label">Pending Applications</span>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3>Manage Opportunities</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="org-posts-list">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="glass-card">
+                    <h3>Incoming Applications</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Applicant</th>
+                                <th>Opportunity</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="org-applications-list">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div id="admin-dashboard" class="dashboard-section">
+                <header style="margin-bottom: 2rem;">
+                    <h2>Admin Dashboard</h2>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card glass-card">
+                        <span class="stat-value" id="admin-total-users">0</span>
+                        <span class="stat-label">Total Users</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-value" id="admin-total-orgs">0</span>
+                        <span class="stat-label">Organizations</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-value" id="admin-active-opps">0</span>
+                        <span class="stat-label">Active Opportunities</span>
+                    </div>
+                </div>
+
+                <!-- Pending Organizations -->
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3>Pending Organization Approvals</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <thead>
+                                    <tr>
+                                        <th>Organization Name</th>
+                                        <th>Contact</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                        <tbody id="admin-pending-orgs-list">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- All Organizations -->
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3>All Organizations</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-all-orgs-list">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Recent Users -->
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3>Manage Users</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Email</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-list">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Manage Opportunities -->
+                <div class="glass-card">
+                    <h3>Manage Opportunities</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Organization</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-opps-list">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Notifications Dashboard -->
+            <div id="notifications-dashboard" class="dashboard-section">
+                <header style="margin-bottom: 2rem;">
+                    <h2>Notifications</h2>
+                </header>
+                <div class="glass-card">
+                    <div id="notifications-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- Populated via JS -->
+                        <div class="text-center" style="color: var(--text-muted); padding: 2rem;">Loading
+                            notifications...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create/Edit Opportunity Modal -->
+    <div class="modal" id="post-modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 1.5rem;" id="modal-title">Post New Opportunity</h2>
+            <form id="post-form">
+                <input type="hidden" id="post-id">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="post-title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="post-desc" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="post-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="post-location" required>
+                </div>
+                <!-- Slots -->
+                <div class="form-group">
+                    <label>Slots Available</label>
+                    <input type="number" id="post-slots" value="5" required>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top:2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closePostModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-post-btn">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Org Profile Completion Modal -->
+    <div class="modal" id="org-profile-modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 1.5rem;">Complete Organization Profile</h2>
+            <p style="margin-bottom: 1rem; color: var(--text-muted);">Please provide details about your organization to
+                start posting opportunities.</p>
+            <form id="org-profile-form">
+                <div class="form-group">
+                    <label>Organization Name</label>
+                    <input type="text" id="org-name-init" required>
+                </div>
+                <div class="form-group">
+                    <label>Contact Email</label>
+                    <input type="email" id="org-email-init" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Save & Continue</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/dashboard.js"></script>
+</body>
+
+</html>

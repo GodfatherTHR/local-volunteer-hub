@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - VolunteerCaus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .msg-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            height: calc(100vh - var(--nav-height));
+            margin-top: var(--nav-height);
+            background: var(--background);
+        }
+
+        .sidebar {
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 1px solid var(--glass-border);
+            overflow-y: auto;
+            border-left: 1px solid var(--glass-border);
+        }
+
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+            background: var(--background);
+            height: 100%;
+        }
+
+        .user-item {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-item:hover,
+        .user-item.active {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-details h4 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .user-details p {
+            margin: 0.25rem 0 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .messages-list {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .msg-sent {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+            border-radius: 1rem 1rem 0 1rem;
+        }
+
+        .msg-received {
+            align-self: flex-start;
+            background: var(--surface-light);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem 1rem 1rem 0;
+        }
+
+        .msg-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+            display: block;
+            text-align: right;
+        }
+
+        .input-area {
+            padding: 1.5rem;
+            background: var(--surface);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 0.875rem 1.5rem;
+            border-radius: 2rem;
+            border: 1px solid var(--glass-border);
+            background: var(--background);
+            color: white;
+            resize: none;
+            height: 50px;
+            outline: none;
+        }
+
+        #message-input:focus {
+            border-color: var(--primary);
+        }
+
+        .empty-chat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .msg-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+                /* Mobile handling is complex, hiding for MVP focus on core task */
+            }
+
+            /* If sidebar active, show it. If chat active, show chat. Simple toggle logic needed for full mobile support. */
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar glass" style="position: fixed; top: 0; width: 100%; z-index: 100;">
+        <div class="container nav-container">
+            <a href="/" class="logo">Volunteer<span class="highlight">Caus</span></a>
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="organizations.html" class="nav-link">Organizations</a>
+            </div>
+        </div>
+    </nav>
+    <div style="height: var(--nav-height);"></div>
+
+    <div class="msg-container">
+        <!-- Sidebar: Conversation List -->
+        <aside class="sidebar" id="conversations-list">
+            <div style="padding: 1.5rem; color: var(--text-muted);">Loading conversations...</div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-area">
+            <header
+                style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; gap: 1rem; background: rgba(15, 23, 42, 0.8);">
+                <div class="user-avatar" id="chat-header-avatar"
+                    style="width: 32px; height: 32px; font-size: 0.9rem; display: none;">U</div>
+                <div style="font-weight: 600;" id="chat-header-name"> Select a conversation </div>
+            </header>
+
+            <div class="messages-list" id="messages-list">
+                <div class="empty-chat">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">💬</div>
+                    <h3>Your Messages</h3>
+                    <p>Select a contact to start chatting</p>
+                </div>
+            </div>
+
+            <form class="input-area" id="message-form">
+                <input type="text" id="message-input" placeholder="Type a message..." disabled autocomplete="off">
+                <button type="submit" class="btn btn-primary" id="send-btn" disabled>
+                    Send
+                    <span style="margin-left: 0.5rem;">➤</span>
+                </button>
+            </form>
+        </main>
+    </div>
+
+    <!-- Script -->
+    <script type="module" src="js/messages.js"></script>
+</body>
+
+</html>

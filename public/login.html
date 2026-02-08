@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - VolunteerCaus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card glass-card">
+            <h2 class="text-center mb-4">Welcome Back</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="********">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Log In</button>
+            </form>
+            <p class="text-center mt-3">
+                Don't have an account? <a href="register.html" class="highlight">Sign up</a>
+            </p>
+            <div id="message" class="text-center mt-3"></div>
+        </div>
+    </div>
+
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 2.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--surface-light);
+            background: var(--surface);
+            color: white;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .w-100 {
+            width: 100%;
+        }
+
+        .mt-3 {
+            margin-top: 1rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+    </style>
+
+    <script type="module">
+        import { signIn } from './js/supabase-client.js';
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const msg = document.getElementById('message');
+
+            msg.textContent = 'Logging in...';
+
+            const { data, error } = await signIn(email, password);
+
+            if (error) {
+                msg.textContent = `Error: ${error.message}`;
+                msg.style.color = '#ef4444';
+            } else {
+                msg.textContent = 'Success! Redirecting...';
+                msg.style.color = '#22c55e';
+                setTimeout(() => window.location.href = 'dashboard.html', 1000);
+            }
+        });
+    </script>
+</body>
+
+</html>

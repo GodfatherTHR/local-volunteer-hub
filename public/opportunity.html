@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opportunity Details - VolunteerCaus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .detail-header {
+            padding: 4rem 0;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(99, 102, 241, 0.1) 100%);
+            border-bottom: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .detail-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .meta-row {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item strong {
+            color: var(--text-main);
+        }
+
+        .description-box {
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            white-space: pre-line;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar glass">
+        <div class="container nav-container">
+            <a href="/" class="logo">Volunteer<span class="highlight">Caus</span></a>
+            <div class="nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="opportunities.html" class="nav-link">Opportunities</a>
+            </div>
+        </div>
+    </nav>
+    <div style="height: var(--nav-height);"></div>
+
+    <div id="loading" class="detail-header">
+        <div class="container">
+            <h1>Loading...</h1>
+        </div>
+    </div>
+
+    <div id="content" style="display:none;">
+        <header class="detail-header">
+            <div class="container">
+                <a href="opportunities.html" class="back-link">← Back to Opportunities</a>
+                <div style="color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;"
+                    id="org-name">Organization Name</div>
+                <h1 style="font-size: 3rem; margin-bottom: 1rem; line-height: 1.1;" id="opp-title">Opportunity Title
+                </h1>
+            </div>
+        </header>
+
+        <div class="detail-container">
+            <div class="meta-row">
+                <div class="meta-item">
+                    <span>📍</span>
+                    <strong id="opp-location">Location</strong>
+                </div>
+                <div class="meta-item">
+                    <span>📅</span>
+                    <strong id="opp-date">Date</strong>
+                </div>
+                <div class="meta-item">
+                    <span>👥</span>
+                    <strong id="opp-slots">0 slots</strong>
+                </div>
+                <div class="meta-item">
+                    <span>🕒</span>
+                    <strong id="opp-time">Time</strong>
+                </div>
+            </div>
+
+            <div class="description-box" id="opp-desc">
+                Description goes here...
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn btn-primary btn-lg" id="apply-btn"
+                    style="padding: 1rem 3rem; font-size: 1.2rem;">Apply Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Modal -->
+    <div class="modal" id="apply-modal">
+        <div class="modal-content">
+            <h2>Apply for <span id="modal-opp-title" class="highlight">Opportunity</span></h2>
+            <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Confirm your interest in this role.</p>
+            <form id="apply-form">
+                <input type="hidden" id="opp-id-input">
+                <div class="form-group">
+                    <label>Why are you interested?</label>
+                    <textarea rows="4"
+                        style="width:100%; padding: 0.75rem; background:var(--surface-light); border:1px solid var(--glass-border); color:white; border-radius:var(--radius-sm);"
+                        placeholder="Tell us briefly about your motivation..."></textarea>
+                </div>
+                <div style="display:flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="document.getElementById('apply-modal').classList.remove('open')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/opportunity-detail.js"></script>
+</body>
+
+</html>
