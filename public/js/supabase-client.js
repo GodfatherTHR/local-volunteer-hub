@@ -1,6 +1,6 @@
 
-const supabaseUrl = 'https://zzrmrjuhzmelajqpetaj.supabase.co'
-const supabaseKey = 'sb_publishable_G-yNaMPNcxzTKyx8rQMrAg_Sy9D8OJA'
+const supabaseUrl = 'https://qngxgbwcfsbcwxjjaqgk.supabase.co'
+const supabaseKey = 'sb_publishable_Q0yjTExN7XeSGaQze0cl4g_c5fonnZh'
 const client = supabase.createClient(supabaseUrl, supabaseKey)
 
 // Export the client for use in other modules

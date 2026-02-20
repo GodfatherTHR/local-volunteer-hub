@@ -1,22 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VolunteerCaus | Local Volunteer Hub</title>
     <meta name="description" content="Connect with organizations and make a difference in your community.">
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
-    
+
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
 
     <!-- Navigation -->
@@ -39,12 +41,13 @@
     <header class="hero">
         <div class="container hero-content">
             <h1 class="hero-title">Make a Real Impact in Your <span class="gradient-text">Local Community</span></h1>
-            <p class="hero-subtitle">Connect with non-profits, find meaningful opportunities, and track your volunteer journey all in one place.</p>
+            <p class="hero-subtitle">Connect with non-profits, find meaningful opportunities, and track your volunteer
+                journey all in one place.</p>
             <div class="hero-actions">
                 <a href="register.html" class="btn btn-lg btn-primary">Get Started</a>
                 <a href="opportunities.html" class="btn btn-lg btn-outline">Browse Opportunities</a>
             </div>
-            
+
             <div class="hero-stats glass">
                 <div class="stat-item">
                     <span class="stat-number">500+</span>
@@ -104,6 +107,67 @@
         </div>
     </section>
 
+    <!-- Team Section -->
+    <section class="team section bg-darker">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">Course <span class="gradient-text">Instructor</span></h2>
+                <p class="section-subtitle">Under the guidance of our honorable teacher.</p>
+            </div>
+
+            <div class="teacher-container">
+                <div class="team-card teacher-card glass-card">
+                    <div class="team-image-container teacher-img-border">
+                        <img src="images/team/Tuhinsir.png" alt="Tuhin Hossain" class="team-image"
+                            onerror="this.src='https://ui-avatars.com/api/?name=Tuhin+Hossain&background=8b5cf6&color=fff&size=200'">
+                    </div>
+                    <div class="team-info">
+                        <h3>Tuhin Hossain</h3>
+                        <p class="course-name">System Analysis and Design</p>
+                        <span class="badge badge-teacher">Course Instructor</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header text-center" style="margin-top: 5rem;">
+                <h2 class="section-title">Our <span class="gradient-text">Team</span></h2>
+                <p class="section-subtitle">The developers who brought this vision to life.</p>
+            </div>
+
+            <div class="team-grid">
+                <div class="team-card glass-card">
+                    <div class="team-image-container">
+                        <img src="images/team/RAZIN.jpg" alt="RAZIN IBN ASAD MOLLA" class="team-image"
+                            onerror="this.src='https://ui-avatars.com/api/?name=Razin+Asad&background=6366f1&color=fff&size=200'">
+                    </div>
+                    <div class="team-info">
+                        <h3>RAZIN IBN ASAD MOLLA</h3>
+                        <p class="team-id">ID: 241010123</p>
+                        <p class="team-role">Lead Developer</p>
+                        <div class="team-social">
+                            <span class="badge">Team Member</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="team-card glass-card">
+                    <div class="team-image-container">
+                        <img src="images/team/TORIQUL.png" alt="Md. Toriqul Haque" class="team-image"
+                            onerror="this.src='https://ui-avatars.com/api/?name=Toriqul+Haque&background=ec4899&color=fff&size=200'">
+                    </div>
+                    <div class="team-info">
+                        <h3>Md. Toriqul Haque</h3>
+                        <p class="team-id">ID: 241010004</p>
+                        <p class="team-role">Lead Developer</p>
+                        <div class="team-social">
+                            <span class="badge badge-secondary">Team Member</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container footer-content">
@@ -134,4 +198,5 @@
     <script type="module" src="js/supabase-client.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>
+
 </html>
