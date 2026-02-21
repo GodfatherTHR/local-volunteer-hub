@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Messages - VolunteerCaus</title>
+    <title>Messages - VolunteerHub</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -161,13 +161,37 @@
 
             /* If sidebar active, show it. If chat active, show chat. Simple toggle logic needed for full mobile support. */
         }
+
+        @keyframes msgSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 
 <body>
     <nav class="navbar glass" style="position: fixed; top: 0; width: 100%; z-index: 100;">
         <div class="container nav-container">
-            <a href="/" class="logo">Volunteer<span class="highlight">Caus</span></a>
+            <a href="/" class="logo">Volunteer<span class="highlight">Hub</span></a>
             <div class="nav-links">
                 <a href="dashboard.html" class="nav-link">Dashboard</a>
                 <a href="organizations.html" class="nav-link">Organizations</a>

@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
 
-    document.title = `${opp.title} - VolunteerCaus`;
+    document.title = `${opp.title} - VolunteerHub`;
     document.getElementById('org-name').textContent = opp.organizations?.organization_name || 'Organization';
     document.getElementById('opp-title').textContent = opp.title;
     document.getElementById('opp-desc').textContent = opp.description;
