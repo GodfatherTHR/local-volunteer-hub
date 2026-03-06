@@ -2,7 +2,20 @@ import { supabase } from './supabase-client.js';
 
 let currentUser = null;
 let currentPartnerId = null;
-let realtimeChannel = null; // Track the active realtime channel
+let realtimeChannel = null;
+
+const scrollToBottom = () => {
+    const container = document.getElementById('messages-list');
+    if (container) {
+        // Use requestAnimationFrame for smoothness, then setTimeout for DOM update certainty
+        requestAnimationFrame(() => {
+            container.scrollTop = container.scrollHeight;
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 50);
+        });
+    }
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Check
@@ -98,6 +111,7 @@ function subscribeToCurrentChat(partnerId) {
                     (newMsg.sender_id === currentUser.id && newMsg.recipient_id === partnerId)
                 ) {
                     appendMessageBubble(newMsg, newMsg.sender_id === currentUser.id);
+                    scrollToBottom();
                     // Auto-mark as read
                     if (newMsg.recipient_id === currentUser.id) {
                         supabase.from('messages').update({ is_read: true }).eq('id', newMsg.id);
@@ -116,59 +130,42 @@ function subscribeToCurrentChat(partnerId) {
 function appendMessageBubble(msg, isMe) {
     const chatContainer = document.getElementById('messages-list');
 
-    // Remove the "No messages yet" placeholder if present
-    const placeholder = chatContainer.querySelector('[data-placeholder]');
-    if (placeholder) placeholder.remove();
+    // Remove the "Pick up where you left off" empty state if present
+    const emptyState = chatContainer.querySelector('.empty-state');
+    if (emptyState) emptyState.remove();
 
     const time = formatDhakaTime(msg.created_at);
     const bubble = document.createElement('div');
     bubble.className = `message-bubble ${isMe ? 'msg-sent' : 'msg-received'}`;
     bubble.id = msg.id;
-    bubble.style.animation = 'msgSlideIn 0.25s ease';
     bubble.innerHTML = `
         ${escapeHtml(msg.body)}
-        <span class="msg-time" style="color: ${isMe ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)'}">
+        <span class="msg-meta">
             ${time}
         </span>
     `;
     chatContainer.appendChild(bubble);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    scrollToBottom();
 }
 
 /**
  * Updates the sidebar conversation preview for a given partner.
  */
-function updateSidebarPreview(partnerId, lastMessage, hasUnread = false) {
+function updateSidebarPreview(partnerId, lastMessage) {
     const item = document.getElementById(`user-${partnerId}`);
     if (!item) {
-        // New conversation — reload sidebar
         loadConversations();
         return;
     }
 
-    const previewEl = item.querySelector('.user-details p');
+    const previewEl = item.querySelector('.user-info p');
     if (previewEl) previewEl.textContent = lastMessage;
-
-    // Add unread dot if not already there
-    if (hasUnread && !item.querySelector('.unread-dot')) {
-        const dot = document.createElement('div');
-        dot.className = 'unread-dot';
-        dot.style.cssText = 'width:8px;height:8px;background:var(--primary);border-radius:50%;margin-left:auto;flex-shrink:0;';
-        item.appendChild(dot);
-
-        const nameEl = item.querySelector('h4');
-        if (nameEl) {
-            nameEl.style.fontWeight = '700';
-            nameEl.style.color = 'var(--primary)';
-        }
-    }
 }
 
 /**
  * Shows a non-intrusive toast notification for new messages.
  */
 function showNewMessageToast(msg) {
-    // Remove existing toast if any
     const existing = document.getElementById('msg-toast');
     if (existing) existing.remove();
 
@@ -176,17 +173,16 @@ function showNewMessageToast(msg) {
     toast.id = 'msg-toast';
     toast.style.cssText = `
         position: fixed; bottom: 2rem; right: 2rem; z-index: 9999;
-        background: var(--surface); border: 1px solid var(--primary);
-        border-radius: var(--radius-md); padding: 1rem 1.25rem;
-        box-shadow: 0 8px 32px rgba(99,102,241,0.3);
-        display: flex; align-items: center; gap: 0.75rem;
-        animation: toastSlideIn 0.3s ease; max-width: 280px; cursor: pointer;
+        background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px);
+        border: 1px solid var(--primary); border-radius: var(--radius-lg); padding: 1rem 1.25rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 1rem;
+        animation: toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); max-width: 320px; cursor: pointer;
     `;
     toast.innerHTML = `
-        <div style="width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">💬</div>
-        <div>
-            <div style="font-weight:600;font-size:0.875rem;color:var(--text-main)">New Message</div>
-            <div style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${escapeHtml(msg.body)}</div>
+        <div class="user-avatar" style="width:40px;height:40px;font-size:1rem;">💬</div>
+        <div style="flex:1; min-width:0;">
+            <div style="font-weight:700;font-size:0.9rem;color:white">New Message</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(msg.body)}</div>
         </div>
     `;
     toast.onclick = () => {
@@ -194,23 +190,18 @@ function showNewMessageToast(msg) {
         toast.remove();
     };
     document.body.appendChild(toast);
-
-    // Auto-dismiss after 4s
     setTimeout(() => toast.remove(), 4000);
 }
 
 function escapeHtml(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
-// Supabase stores `timestamp without time zone` as UTC but returns it WITHOUT 'Z'.
-// Appending 'Z' forces JavaScript to correctly parse it as UTC,
-// so the Asia/Dhaka conversion (UTC+6) is accurate.
 function parseUTC(ts) {
     if (!ts) return new Date();
-    // Already has timezone info (Z or +xx:xx), use as-is
     if (ts.endsWith('Z') || ts.includes('+')) return new Date(ts);
-    // No timezone suffix → treat as UTC
     return new Date(ts + 'Z');
 }
 
@@ -226,7 +217,7 @@ function formatDhakaTime(ts) {
 
 async function loadConversations(targetId = null, targetName = null) {
     const list = document.getElementById('conversations-list');
-    list.innerHTML = '<div style="padding: 1.5rem; color: var(--text-muted);">Loading conversations...</div>';
+    list.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-muted);">Loading conversations...</div>';
 
     const { data: messages, error } = await supabase
         .from('messages')
@@ -239,14 +230,11 @@ async function loadConversations(targetId = null, targetName = null) {
         .order('created_at', { ascending: false });
 
     if (error) {
-        console.error('Error loading messages:', error);
-        list.innerHTML = '<div style="padding: 1rem; color: #ef4444;">Error loading chats.</div>';
+        list.innerHTML = '<div style="padding: 2rem; color: #ef4444; text-align:center;">Error loading chats.</div>';
         return;
     }
 
-    // Process unique partners
     const partnersMap = new Map();
-
     messages.forEach(msg => {
         const isMeSender = msg.sender_id === currentUser.id;
         const partnerId = isMeSender ? msg.recipient_id : msg.sender_id;
@@ -265,15 +253,13 @@ async function loadConversations(targetId = null, targetName = null) {
         }
     });
 
-    // If targetId provided (New Chat), ensure it's in the list
     if (targetId && !partnersMap.has(targetId)) {
         partnersMap.set(targetId, {
             id: targetId,
-            name: targetName || 'New Contact',
-            lastMessage: 'Start a conversation',
+            name: targetName || 'New Chat',
+            lastMessage: 'Start a new conversation',
             timestamp: new Date().toISOString(),
-            unread: false,
-            isNew: true
+            unread: false
         });
     }
 
@@ -281,39 +267,28 @@ async function loadConversations(targetId = null, targetName = null) {
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     if (partners.length === 0) {
-        list.innerHTML = '<div style="padding: 1.5rem; color: var(--text-muted);">No conversations yet.</div>';
+        list.innerHTML = '<div style="padding: 3rem; text-align: center; color: var(--text-muted); opacity: 0.6;"><h3>No messages yet</h3><p>Your chat history will appear here.</p></div>';
     } else {
         list.innerHTML = partners.map(p => `
             <div class="user-item ${p.id === targetId ? 'active' : ''}" onclick="openChat('${p.id}', '${escapeHtml(p.name)}')" id="user-${p.id}">
                 <div class="user-avatar">${p.name.charAt(0).toUpperCase()}</div>
-                <div class="user-details">
-                    <h4 style="font-weight: ${p.unread ? '700' : '500'}; color: ${p.unread ? 'var(--primary)' : 'inherit'}">${escapeHtml(p.name)}</h4>
+                <div class="user-info">
+                    <h4 style="color: ${p.unread ? 'var(--primary)' : 'white'}; font-weight: ${p.unread ? '700' : '500'}">${escapeHtml(p.name)}</h4>
                     <p>${escapeHtml(p.lastMessage)}</p>
                 </div>
-                ${p.unread ? '<div class="unread-dot" style="width:8px;height:8px;background:var(--primary);border-radius:50%;margin-left:auto;flex-shrink:0;"></div>' : ''}
+                ${p.unread ? '<div style="width:8px;height:8px;background:var(--primary);border-radius:50%;box-shadow: 0 0 8px var(--primary);"></div>' : ''}
             </div>
         `).join('');
     }
 
-    // If targetId present, open chat immediately
-    if (targetId) {
-        openChat(targetId, targetName || partnersMap.get(targetId)?.name);
-    }
+    if (targetId) openChat(targetId, targetName || partnersMap.get(targetId)?.name);
 }
 
 window.openChat = async (partnerId, partnerName) => {
     currentPartnerId = partnerId;
 
-    // UI Updates
     document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
-    const activeItem = document.getElementById(`user-${partnerId}`);
-    if (activeItem) {
-        activeItem.classList.add('active');
-        // Remove unread dot
-        activeItem.querySelector('.unread-dot')?.remove();
-        const nameEl = activeItem.querySelector('h4');
-        if (nameEl) { nameEl.style.fontWeight = '500'; nameEl.style.color = 'inherit'; }
-    }
+    document.getElementById(`user-${partnerId}`)?.classList.add('active');
 
     const headerName = document.getElementById('chat-header-name');
     const headerAvatar = document.getElementById('chat-header-avatar');
@@ -321,19 +296,16 @@ window.openChat = async (partnerId, partnerName) => {
     headerAvatar.style.display = 'flex';
     headerAvatar.textContent = (partnerName || 'U').charAt(0).toUpperCase();
 
-    // Enable Input
     document.getElementById('message-input').disabled = false;
     document.getElementById('send-btn').disabled = false;
-    document.getElementById('message-input').focus();
 
-    // Load messages and subscribe to this chat channel
     await loadMessages(partnerId);
     subscribeToCurrentChat(partnerId);
 };
 
 async function loadMessages(partnerId) {
     const chatContainer = document.getElementById('messages-list');
-    chatContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted)">Loading...</div>';
+    chatContainer.innerHTML = '<div style="text-align:center;padding:3rem;"><div class="spinner"></div></div>';
 
     const { data: messages, error } = await supabase
         .from('messages')
@@ -342,23 +314,26 @@ async function loadMessages(partnerId) {
         .order('created_at', { ascending: true });
 
     if (error) {
-        console.error(error);
-        chatContainer.innerHTML = '<div style="text-align:center;color:#ef4444">Error loading messages</div>';
+        chatContainer.innerHTML = '<div style="text-align:center;color:#ef4444;padding:2rem;">Failed to load messages</div>';
         return;
     }
 
     if (!messages || messages.length === 0) {
-        chatContainer.innerHTML = '<div data-placeholder="true" style="text-align:center;margin-top:auto;padding:2rem;color:var(--text-muted);opacity:0.7;">No messages yet. Say hello! 👋</div>';
+        chatContainer.innerHTML = `
+            <div class="empty-state">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">👋</div>
+                <h3 style="color: white;">Say Hello!</h3>
+                <p>Start your conversation with ${document.getElementById('chat-header-name').textContent}</p>
+            </div>`;
         return;
     }
 
     renderMessages(messages, chatContainer);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    scrollToBottom();
 
-    // Mark as read
     const unreadIds = messages.filter(m => m.recipient_id === currentUser.id && !m.is_read).map(m => m.id);
     if (unreadIds.length > 0) {
-        supabase.from('messages').update({ is_read: true }).in('id', unreadIds);
+        await supabase.from('messages').update({ is_read: true }).in('id', unreadIds);
     }
 }
 
@@ -369,7 +344,7 @@ function renderMessages(messages, container) {
         return `
             <div class="message-bubble ${isMe ? 'msg-sent' : 'msg-received'}" id="${msg.id}">
                 ${escapeHtml(msg.body)}
-                <span class="msg-time" style="color: ${isMe ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)'}">
+                <span class="msg-meta">
                     ${time}
                 </span>
             </div>
@@ -385,26 +360,20 @@ async function sendMessage(e) {
     const text = input.value.trim();
     if (!text) return;
 
-    // Optimistic UI — append immediately with a temp ID
-    const tempId = 'temp-' + Date.now();
     const chatContainer = document.getElementById('messages-list');
-    const placeholder = chatContainer.querySelector('[data-placeholder]');
-    if (placeholder) placeholder.remove();
+    const emptyState = chatContainer.querySelector('.empty-state');
+    if (emptyState) emptyState.remove();
 
     const time = formatDhakaTime(new Date().toISOString());
+    const tempId = 'temp-' + Date.now();
     const tempBubble = document.createElement('div');
     tempBubble.className = 'message-bubble msg-sent';
-    tempBubble.id = tempId;
-    tempBubble.style.opacity = '0.6';
-    tempBubble.innerHTML = `
-        ${escapeHtml(text)}
-        <span class="msg-time" style="color:rgba(255,255,255,0.7)">${time} ·sending</span>
-    `;
+    tempBubble.style.opacity = '0.7';
+    tempBubble.innerHTML = `${escapeHtml(text)} <span class="msg-meta">${time} · sending...</span>`;
     chatContainer.appendChild(tempBubble);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    scrollToBottom();
     input.value = '';
 
-    // Send to DB
     const { data, error } = await supabase
         .from('messages')
         .insert([{
@@ -417,18 +386,13 @@ async function sendMessage(e) {
         .single();
 
     if (error) {
-        console.error('Send error:', error);
-        alert('Failed to send message.');
-        tempBubble.remove();
+        tempBubble.classList.add('error');
+        tempBubble.querySelector('.msg-meta').textContent = 'Failed to send';
         input.value = text;
     } else {
-        // Swap temp bubble → confirmed (realtime will NOT duplicate because
-        // the subscription only listens to the partner's sender_id, not ours)
         tempBubble.style.opacity = '1';
         tempBubble.id = data.id;
-        tempBubble.querySelector('.msg-time').textContent = time;
-
-        // Also update sidebar preview for this contact
-        updateSidebarPreview(currentPartnerId, text, false);
+        tempBubble.querySelector('.msg-meta').textContent = time;
+        updateSidebarPreview(currentPartnerId, text);
     }
 }

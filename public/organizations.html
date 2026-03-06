@@ -87,7 +87,10 @@
 <body>
     <nav class="navbar glass">
         <div class="container nav-container">
-            <a href="/" class="logo">Volunteer<span class="highlight">Hub</span></a>
+            <a href="/" class="logo">
+                <img src="images/team/logo.png" alt="VolunteerHub Logo" class="logo-img">
+                Volunteer<span class="highlight">Hub</span>
+            </a>
             <div class="nav-links">
                 <a href="dashboard.html" class="nav-link">Dashboard</a>
                 <a href="opportunities.html" class="nav-link">Opportunities</a>
@@ -123,6 +126,21 @@
                 window.location.href = 'login.html';
                 return;
             }
+
+            // Update Navbar for logged in user
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.innerHTML = `
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="profile.html" class="nav-link">My Profile</a>
+                <a href="opportunities.html" class="nav-link">Opportunities</a>
+                <a href="#" class="btn btn-secondary" id="nav-logout">Logout</a>
+            `;
+            document.getElementById('nav-logout').onclick = async (e) => {
+                e.preventDefault();
+                const { signOut } = await import('./supabase-client.js');
+                await signOut();
+                window.location.reload();
+            };
 
             const grid = document.getElementById('org-grid');
 

@@ -24,7 +24,10 @@
     <!-- Navigation -->
     <nav class="navbar glass">
         <div class="container nav-container">
-            <a href="/" class="logo">Volunteer<span class="highlight">Hub</span></a>
+            <a href="/" class="logo">
+                <img src="images/team/logo.png" alt="VolunteerHub Logo" class="logo-img">
+                Volunteer<span class="highlight">Hub</span>
+            </a>
             <div class="nav-links">
                 <a href="opportunities.html" class="nav-link">Opportunities</a>
                 <a href="organizations.html" class="nav-link">Organizations</a>
@@ -39,6 +42,17 @@
 
     <!-- Hero Section -->
     <header class="hero">
+        <div class="hero-slider" id="hero-slider">
+            <div class="slide active"
+                style="background-image: linear-gradient(rgba(15, 23, 42, 0.4), rgba(2, 6, 23, 0.6)), url('images/team/volunteer1.png');">
+            </div>
+            <div class="slide"
+                style="background-image: linear-gradient(rgba(15, 23, 42, 0.4), rgba(2, 6, 23, 0.6)), url('images/team/volunteer2.png');">
+            </div>
+            <div class="slide"
+                style="background-image: linear-gradient(rgba(15, 23, 42, 0.4), rgba(2, 6, 23, 0.6)), url('images/team/volunteer3.png');">
+            </div>
+        </div>
         <div class="container hero-content">
             <h1 class="hero-title">Make a Real Impact in Your <span class="gradient-text">Local Community</span></h1>
             <p class="hero-subtitle">Connect with non-profits, find meaningful opportunities, and track your volunteer
@@ -108,60 +122,76 @@
     </section>
 
     <!-- Team Section -->
-    <section class="team section bg-darker">
+    <section class="section">
         <div class="container">
-            <div class="section-header text-center">
-                <h2 class="section-title">Course <span class="gradient-text">Instructor</span></h2>
-                <p class="section-subtitle">Under the guidance of our honorable teacher.</p>
+            <div class="section-header" style="justify-content: center; text-align: center; flex-direction: column;">
+                <span class="badge" style="margin-bottom: 1rem;">Project Team</span>
+                <h2 class="section-title">Design & Development Experts</h2>
+                <p style="color: var(--text-muted); margin-top: 1rem;">System Analysis & Design Project — Spring 2026
+                </p>
             </div>
 
+            <!-- Instructor Header -->
             <div class="teacher-container">
-                <div class="team-card teacher-card glass-card">
-                    <div class="team-image-container teacher-img-border">
+                <div class="glass-card teacher-card" style="text-align: center; max-width: 600px; margin: 0 auto;">
+                    <span class="badge badge-teacher" style="margin-bottom: 1.5rem;">Course Instructor</span>
+                    <div class="team-image-container teacher-img-border"
+                        style="width: 180px; height: 180px; margin: 0 auto 1.5rem; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent);">
                         <img src="images/team/Tuhinsir.png" alt="Tuhin Hossain" class="team-image"
+                            style="width: 100%; height: 100%; object-fit: cover;"
                             onerror="this.src='https://ui-avatars.com/api/?name=Tuhin+Hossain&background=8b5cf6&color=fff&size=200'">
                     </div>
                     <div class="team-info">
-                        <h3>Tuhin Hossain</h3>
-                        <p class="course-name">System Analysis and Design</p>
-                        <span class="badge badge-teacher">Course Instructor</span>
+                        <h3 style="font-size: 1.8rem;">Tuhin Hossain</h3>
+                        <div class="course-name" style="color: var(--accent); font-weight: 500; margin-top: 0.5rem;">
+                            System Analysis and Design Lab (CSE 2222-0613) [A]</div>
+                        <p
+                            style="color: var(--text-secondary); max-width: 450px; margin: 1.25rem auto 0; font-size: 0.95rem; line-height: 1.6;">
+                            Expert guidance in architectural design and system implementation, fostering innovation in
+                            community service platforms.
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <div class="section-header text-center" style="margin-top: 5rem;">
-                <h2 class="section-title">Our <span class="gradient-text">Team</span></h2>
-                <p class="section-subtitle">The developers who brought this vision to life.</p>
-            </div>
-
-            <div class="team-grid">
-                <div class="team-card glass-card">
-                    <div class="team-image-container">
+            <!-- Student Grid -->
+            <div class="team-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; margin-top: 5rem;">
+                <!-- Member 1 -->
+                <div class="glass-card team-card" style="padding: 2.5rem; text-align: center;">
+                    <div class="team-image-container"
+                        style="width: 150px; height: 150px; margin: 0 auto 1.5rem; border-radius: 50%; overflow: hidden; border: 4px solid var(--primary);">
                         <img src="images/team/RAZIN.jpg" alt="RAZIN IBN ASAD MOLLA" class="team-image"
+                            style="width: 100%; height: 100%; object-fit: cover;"
                             onerror="this.src='https://ui-avatars.com/api/?name=Razin+Asad&background=6366f1&color=fff&size=200'">
                     </div>
                     <div class="team-info">
+                        <div class="team-id"
+                            style="color: var(--primary-light); font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                            ID: 241010123</div>
                         <h3>RAZIN IBN ASAD MOLLA</h3>
-                        <p class="team-id">ID: 241010123</p>
-                        <p class="team-role">Lead Developer</p>
-                        <div class="team-social">
-                            <span class="badge">Team Member</span>
-                        </div>
+                        <div class="team-role" style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                            Developer</div>
+                        <div class="badge">Team Member</div>
                     </div>
                 </div>
 
-                <div class="team-card glass-card">
-                    <div class="team-image-container">
+                <!-- Member 2 -->
+                <div class="glass-card team-card" style="padding: 2.5rem; text-align: center;">
+                    <div class="team-image-container"
+                        style="width: 150px; height: 150px; margin: 0 auto 1.5rem; border-radius: 50%; overflow: hidden; border: 4px solid var(--secondary);">
                         <img src="images/team/TORIQUL.png" alt="Md. Toriqul Haque" class="team-image"
+                            style="width: 100%; height: 100%; object-fit: cover;"
                             onerror="this.src='https://ui-avatars.com/api/?name=Toriqul+Haque&background=ec4899&color=fff&size=200'">
                     </div>
                     <div class="team-info">
+                        <div class="team-id"
+                            style="color: var(--secondary); font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                            ID: 241010004</div>
                         <h3>Md. Toriqul Haque</h3>
-                        <p class="team-id">ID: 241010004</p>
-                        <p class="team-role">Lead Developer</p>
-                        <div class="team-social">
-                            <span class="badge badge-secondary">Team Member</span>
-                        </div>
+                        <div class="team-role" style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                            Developer</div>
+                        <div class="badge badge-secondary"> Team Member</div>
                     </div>
                 </div>
             </div>
@@ -170,28 +200,36 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container footer-content">
-            <div class="footer-brand">
-                <a href="/" class="logo">Volunteer<span class="highlight">Hub</span></a>
-                <p>Empowering communities through connection and service.</p>
-            </div>
-            <div class="footer-links">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="/" class="logo" style="font-size: 1.75rem;">
+                        <img src="images/team/logo.png" alt="VolunteerHub Logo" class="logo-img">
+                        Volunteer<span class="highlight">Hub</span>
+                    </a>
+                    <p style="color: var(--text-muted); margin-top: 1.5rem; line-height: 1.8; max-width: 350px;">
+                        A professional platform designed for efficient coordination between volunteers and non-profit
+                        organizations.
+                    </p>
+                </div>
                 <div class="link-group">
                     <h4>Platform</h4>
-                    <a href="#">About Us</a>
-                    <a href="#">How it Works</a>
-                    <a href="#">Security</a>
+                    <a href="opportunities.html">Browse Opportunities</a>
+                    <a href="organizations.html">Our Partners</a>
+                    <a href="#">Security Guidelines</a>
+                    <a href="#">Help Center</a>
                 </div>
                 <div class="link-group">
                     <h4>Community</h4>
-                    <a href="#">Blog</a>
+                    <a href="#">Privacy Policy</a>
                     <a href="#">Success Stories</a>
-                    <a href="#">Help Center</a>
+                    <a href="#">Volunteer Portal</a>
+                    <a href="#">Contact Support</a>
                 </div>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 VolunteerHub. All rights reserved.</p>
+            <div class="footer-bottom">
+                <p>&copy; 2026 VolunteerHub. Developed by CSE Team - IUS. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 

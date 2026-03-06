@@ -1,6 +1,31 @@
 import { supabase, getCurrentUser } from './supabase-client.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Auth-aware navbar
+    const user = await getCurrentUser();
+    if (user) {
+        const navLinks = document.querySelector('.nav-links');
+        navLinks.innerHTML = `
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+            <a href="profile.html" class="nav-link">My Profile</a>
+            <a href="#" class="btn btn-secondary" id="nav-logout">Logout</a>
+        `;
+        document.getElementById('nav-logout').onclick = async (e) => {
+            e.preventDefault();
+            const { signOut } = await import('./supabase-client.js');
+            await signOut();
+            window.location.reload();
+        };
+    } else {
+        const navLinks = document.querySelector('.nav-links');
+        navLinks.innerHTML = `
+            <a href="opportunities.html" class="nav-link">Opportunities</a>
+            <a href="organizations.html" class="nav-link">Organizations</a>
+            <a href="login.html" class="btn btn-secondary">Log In</a>
+            <a href="register.html" class="btn btn-primary">Join Now</a>
+        `;
+    }
+
     loadOpportunities();
 
     // Search Logic

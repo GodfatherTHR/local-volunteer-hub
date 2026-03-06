@@ -11,213 +11,112 @@
     <style>
         .dashboard-container {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: 280px 1fr;
             min-height: 100vh;
-        }
-
-        .sidebar {
-            background: rgba(15, 23, 42, 0.95);
-            border-right: 1px solid var(--glass-border);
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
+            background: var(--bg-darker);
         }
 
         .main-content {
-            padding: 2rem;
+            padding: 3rem;
             overflow-y: auto;
+            background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.05), transparent);
         }
 
         .user-profile {
-            margin-bottom: 3rem;
+            margin-bottom: 3.5rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.25rem;
+            padding: 0.5rem;
         }
 
         .avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.25rem;
-        }
-
-        .nav-item {
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: var(--radius-sm);
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .nav-item:hover,
-        .nav-item.active {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-main);
+            font-size: 1.4rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
 
         .nav-item-logout {
             margin-top: auto;
-            color: #ef4444;
+            color: #ef4444 !important;
+            opacity: 0.8;
         }
 
         .nav-item-logout:hover {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1) !important;
+            opacity: 1;
         }
 
-        /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
         }
 
         .stat-card {
-            padding: 1.5rem;
+            padding: 2rem;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            opacity: 0.5;
         }
 
         .stat-value {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
+            color: var(--text-main);
+            line-height: 1;
         }
 
         .stat-label {
             color: var(--text-muted);
-            font-size: 0.875rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        /* Section Visibility */
         .dashboard-section {
             display: none;
-            animation: fadeIn 0.3s ease;
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .dashboard-section.active {
             display: block;
         }
 
-        @keyframes fadeIn {
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateX(20px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateX(0);
             }
         }
 
-        /* Table Styles */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .data-table th,
-        .data-table td {
-            text-align: left;
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .data-table th {
-            color: var(--text-muted);
-            font-weight: 500;
-            font-size: 0.875rem;
-        }
-
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 99px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .status-active,
-        .status-approved {
-            background: rgba(34, 197, 94, 0.2);
-            color: #4ade80;
-        }
-
-        .status-pending {
-            background: rgba(234, 179, 8, 0.2);
-            color: #facc15;
-        }
-
-        .status-rejected,
-        .status-closed {
-            background: rgba(239, 68, 68, 0.2);
-            color: #f87171;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.open {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--surface);
-            padding: 2rem;
-            border-radius: var(--radius-lg);
-            width: 100%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 1px solid var(--glass-border);
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-muted);
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 0.75rem;
-            background: var(--surface-light);
-            border: 1px solid var(--glass-border);
-            color: white;
-            border-radius: var(--radius-sm);
-        }
-
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
             .dashboard-container {
                 grid-template-columns: 1fr;
             }
@@ -225,8 +124,38 @@
             .sidebar {
                 display: none;
             }
+        }
 
-            /* Add mobile toggle later */
+        .sidebar {
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 1px solid var(--glass-border);
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-logo {
+            margin-bottom: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            overflow: hidden;
+        }
+
+        .sidebar-logo img {
+            max-width: 100%;
+            height: auto;
+            max-height: 60px;
+            object-fit: contain;
+        }
+
+        .sidebar-logo span {
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -235,6 +164,10 @@
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar">
+            <a href="index.html" class="sidebar-logo">
+                <img src="images/team/logo.png" alt="VolunteerHub Logo">
+                Volunteer<span class="highlight">Hub</span>
+            </a>
             <div class="user-profile">
                 <div class="avatar" id="sidebar-avatar">U</div>
                 <div>
@@ -461,34 +394,45 @@
     <!-- Create/Edit Opportunity Modal -->
     <div class="modal" id="post-modal">
         <div class="modal-content">
-            <h2 style="margin-bottom: 1.5rem;" id="modal-title">Post New Opportunity</h2>
+            <h2 id="modal-title">Post New Opportunity</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Share a new volunteering chance with your
+                community.</p>
+
             <form id="post-form">
                 <input type="hidden" id="post-id">
+
                 <div class="form-group">
-                    <label>Title</label>
-                    <input type="text" id="post-title" required>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="post-desc" rows="4" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="post-date" required>
-                </div>
-                <div class="form-group">
-                    <label>Location</label>
-                    <input type="text" id="post-location" required>
-                </div>
-                <!-- Slots -->
-                <div class="form-group">
-                    <label>Slots Available</label>
-                    <input type="number" id="post-slots" value="5" required>
+                    <label>📌 Opportunity Title</label>
+                    <input type="text" id="post-title" placeholder="e.g. Community Garden Cleanup" required>
                 </div>
 
-                <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top:2rem;">
+                <div class="form-group">
+                    <label>📝 Description</label>
+                    <textarea id="post-desc" rows="4" placeholder="Describe the role, impact, and requirements..."
+                        required></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label>📅 Event Date</label>
+                        <input type="date" id="post-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>📍 Location</label>
+                        <input type="text" id="post-location" placeholder="e.g. Central Park" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>👥 Slots Available</label>
+                    <input type="number" id="post-slots" min="1" value="5" placeholder="5" required>
+                </div>
+
+                <div
+                    style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border);">
                     <button type="button" class="btn btn-secondary" onclick="closePostModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="save-post-btn">Post</button>
+                    <button type="submit" class="btn btn-primary" id="save-post-btn"
+                        style="min-width: 120px;">Post</button>
                 </div>
             </form>
         </div>
@@ -496,20 +440,24 @@
 
     <!-- Org Profile Completion Modal -->
     <div class="modal" id="org-profile-modal">
-        <div class="modal-content">
-            <h2 style="margin-bottom: 1.5rem;">Complete Organization Profile</h2>
-            <p style="margin-bottom: 1rem; color: var(--text-muted);">Please provide details about your organization to
-                start posting opportunities.</p>
+        <div class="modal-content" style="max-width: 500px;">
+            <h2>Complete Profile</h2>
+            <p style="margin-bottom: 2rem; color: var(--text-secondary); font-size: 0.95rem;">Please finalize your
+                organization details to start posting.</p>
+
             <form id="org-profile-form">
                 <div class="form-group">
-                    <label>Organization Name</label>
-                    <input type="text" id="org-name-init" required>
+                    <label>🏢 Organization Name</label>
+                    <input type="text" id="org-name-init" placeholder="Enter full organization name" required>
                 </div>
                 <div class="form-group">
-                    <label>Contact Email</label>
-                    <input type="email" id="org-email-init" required>
+                    <label>📧 Contact Email</label>
+                    <input type="email" id="org-email-init" placeholder="e.g. info@organization.org" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Save & Continue</button>
+                <div style="margin-top: 2.5rem;">
+                    <button type="submit" class="btn btn-primary w-100" style="padding: 1.1rem;">Save & Get
+                        Started</button>
+                </div>
             </form>
         </div>
     </div>

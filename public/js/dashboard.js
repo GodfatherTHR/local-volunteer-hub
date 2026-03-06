@@ -47,6 +47,7 @@ async function initVolunteerDashboard(user, profile) {
     const nav = document.getElementById('sidebar-nav');
     nav.innerHTML = `
         <div class="nav-item active" onclick="switchSection('volunteer-dashboard', this)">📊 Dashboard</div>
+        <div class="nav-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
         <div class="nav-item" onclick="window.location.href='opportunities.html'">🔍 Browse</div>
         <div class="nav-item" onclick="window.location.href='organizations.html'">🏢 Organizations</div>
         <div class="nav-item" onclick="window.location.href='messages.html'">💬 Messages</div>
@@ -89,6 +90,7 @@ async function initOrgDashboard(user, profile) {
     const nav = document.getElementById('sidebar-nav');
     nav.innerHTML = `
         <div class="nav-item active" onclick="switchSection('org-dashboard', this)">📊 Overview</div>
+        <div class="nav-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
         <div class="nav-item" onclick="window.location.href='messages.html'">💬 Messages</div>
         <div class="nav-item" onclick="switchSection('notifications-dashboard', this); loadNotifications('${user.id}')">🔔 Notifications</div>
     `;
@@ -436,6 +438,7 @@ async function initAdminDashboard(user, profile) {
     const nav = document.getElementById('sidebar-nav');
     nav.innerHTML = `
         <div class="nav-item active" onclick="switchSection('admin-dashboard', this)">📊 Admin Overview</div>
+        <div class="nav-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
         <div class="nav-item" onclick="window.location.href='organizations.html'">🏢 All Organizations</div>
         <div class="nav-item" onclick="window.location.href='messages.html'">💬 Messages</div>
         <div class="nav-item" onclick="switchSection('notifications-dashboard', this); loadNotifications('${user.id}')">🔔 Notifications</div>

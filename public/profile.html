@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - VolunteerHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .profile-header {
+            padding: 4rem 0;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, rgba(15, 23, 42, 0) 100%);
+            border-bottom: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+            border: 4px solid var(--bg-dark);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-top: -3rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .info-card {
+            padding: 2rem;
+        }
+
+        .info-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .stat-box .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .badge-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+                margin-top: 2rem;
+            }
+        }
+
+        .edit-profile-btn {
+            position: absolute;
+            top: 2rem;
+            right: 0;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-dark);
+            padding: 3rem;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalShow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalShow {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        #edit-modal .modal-content {
+            max-width: 500px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar glass">
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <img src="images/team/logo.png" alt="VolunteerHub Logo" class="logo-img">
+                Volunteer<span class="highlight">Hub</span>
+            </a>
+            <div class="nav-links">
+                <a href="opportunities.html" class="nav-link">Opportunities</a>
+                <a href="dashboard.html" class="nav-link" id="nav-dashboard">Dashboard</a>
+                <a href="#" class="nav-link" id="nav-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div style="height: var(--nav-height);"></div>
+
+    <header class="profile-header">
+        <div class="container" style="position: relative;">
+            <button class="btn btn-secondary edit-profile-btn" id="open-edit-btn"
+                style="position: absolute; top: 0; right: 1.5rem;">Edit Profile</button>
+            <div class="profile-avatar-large" id="profile-avatar">U</div>
+            <h1 id="profile-name">Loading...</h1>
+            <p id="profile-role-badge"
+                style="display: inline-block; padding: 0.25rem 1rem; background: rgba(99, 102, 241, 0.1); color: var(--primary); border-radius: 100px; font-weight: 600; font-size: 0.85rem; text-transform: uppercase;">
+                VOLUNTEER</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="profile-grid">
+            <!-- Sidebar: Contact Info -->
+            <aside class="glass-card info-card">
+                <h3>Contact Info</h3>
+                <div class="info-group">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value" id="info-email">...</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value" id="info-phone">Not provided</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Location</div>
+                    <div class="info-value" id="info-location">Not specified</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Joined On</div>
+                    <div class="info-value" id="info-joined">...</div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button class="btn btn-primary w-100" id="share-profile-btn">Share Profile</button>
+                    <p class="text-center" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                        Copy link to your public profile</p>
+                </div>
+            </aside>
+
+            <!-- Main: Bio & Stats -->
+            <div class="glass-card info-card">
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <span class="number" id="stat-hours">0</span>
+                        <span class="label">Hours</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="number" id="stat-projects">0</span>
+                        <span class="label">Initiatives</span>
+                    </div>
+                </div>
+
+                <h3>About Me</h3>
+                <p id="profile-bio" style="color: var(--text-muted); line-height: 1.8; margin-bottom: 2rem;">
+                    No bio provided yet. Tell the community about your passion for volunteering!
+                </p>
+
+                <h3>Skills & Interests</h3>
+                <div class="badge-list" id="skills-list">
+                    <!-- Dynamic -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <h2>Edit Profile</h2>
+            <form id="edit-profile-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="edit-phone">
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="edit-location" placeholder="City, Country">
+                </div>
+                <div class="form-group">
+                    <label>Bio</label>
+                    <textarea id="edit-bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Skills (comma separated)</label>
+                    <input type="text" id="edit-skills" placeholder="Teaching, Cooking, Management...">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="document.getElementById('edit-modal').classList.remove('open')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-profile-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/profile.js"></script>
+</body>
+
+</html>
