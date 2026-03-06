@@ -1,4 +1,4 @@
-/* 
+﻿/* 
    -----------------------------------------
    Design System & Global Variables
    -----------------------------------------
@@ -236,10 +236,10 @@ h6 {
 /* Hero Section */
 .hero {
     position: relative;
-    padding-top: calc(var(--nav-height) + 4rem);
-    padding-bottom: 6rem;
+    padding-top: calc(var(--nav-height) + 6rem);
+    padding-bottom: 9rem;
     overflow: hidden;
-    min-height: 90vh;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     background-color: var(--bg-dark);
@@ -248,42 +248,45 @@ h6 {
 .hero-content {
     position: relative;
     z-index: 10;
-    max-width: 800px;
+    max-width: 1000px;
     text-align: center;
     margin: 0 auto;
 }
 
 .hero-title {
-    font-size: 3.5rem;
-    margin-bottom: 1.5rem;
+    font-size: 4.5rem;
+    margin-bottom: 2rem;
     text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    line-height: 1.1;
 }
 
 .hero-subtitle {
-    font-size: 1.25rem;
+    font-size: 1.45rem;
     color: var(--text-secondary);
     /* Changed from muted to secondary for better contrast */
-    margin-bottom: 2.5rem;
-    max-width: 600px;
+    margin-bottom: 3.5rem;
+    max-width: 750px;
     margin-left: auto;
     margin-right: auto;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    line-height: 1.6;
 }
 
 .hero-actions {
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
     justify-content: center;
-    margin-bottom: 4rem;
+    margin-bottom: 5.5rem;
 }
 
 .hero-stats {
     display: inline-flex;
-    gap: 3rem;
-    padding: 1.75rem 3.5rem;
+    gap: 5rem;
+    padding: 2.25rem 4.5rem;
     border-radius: var(--radius-lg);
-    background: rgba(15, 23, 42, 0.7);
-    /* Slightly darker mask */
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
 }
 
 .stat-item {
@@ -292,14 +295,14 @@ h6 {
 }
 
 .stat-number {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--text-main);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .stat-label {
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: var(--text-muted);
 }
 
@@ -693,6 +696,7 @@ h6 {
     border-top-right-radius: 16px !important;
     border-bottom-right-radius: 16px !important;
 }
+
 /* Modals & Overlays */
 .modal {
     display: none;
@@ -725,7 +729,13 @@ h6 {
 }
 
 @keyframes modalShow {
-    from { opacity: 0; transform: translateY(40px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+    }
 
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
