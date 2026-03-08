@@ -112,7 +112,7 @@ async function initOrgDashboard(user, profile) {
                 user_id: user.id,
                 organization_name: name,
                 contact_email: email,
-                status: 'approved' // Auto-approve for demo
+                status: 'pending' // Requires admin approval
             }]);
 
             if (insertError) {
@@ -126,8 +126,50 @@ async function initOrgDashboard(user, profile) {
         return; // Stop loading dashboard until profile created
     }
 
-    // Setup Post Modal
-    document.getElementById('create-post-btn').onclick = () => openPostModal();
+    // Check Organization Status for Posting
+    const postBtn = document.getElementById('create-post-btn');
+    if (orgData.status === 'approved') {
+        postBtn.onclick = () => openPostModal();
+        postBtn.disabled = false;
+        postBtn.style.opacity = '1';
+        postBtn.style.cursor = 'pointer';
+    } else {
+        postBtn.onclick = () => {
+            if (orgData.status === 'pending') {
+                alert('⏳ Your organization is pending approval. You can post opportunities once an admin approves your profile.');
+            } else {
+                alert('❌ Your organization status does not allow posting. Please contact support.');
+            }
+        };
+        postBtn.style.opacity = '0.6';
+        postBtn.style.cursor = 'not-allowed';
+
+        // Add a pending banner below the header
+        const orgHeader = document.querySelector('#org-dashboard header');
+        if (orgHeader && !document.getElementById('org-pending-banner')) {
+            const banner = document.createElement('div');
+            banner.id = 'org-pending-banner';
+            banner.className = 'glass-card';
+            banner.style.cssText = `
+                margin-bottom: 2rem;
+                border-left: 4px solid #f59e0b;
+                background: rgba(245, 158, 11, 0.05);
+                padding: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            `;
+            banner.innerHTML = `
+                <span style="font-size: 1.5rem;">🕒</span>
+                <div>
+                    <h4 style="color: #f59e0b; margin: 0 0 0.25rem 0;">Pending Admin Approval</h4>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">Your organization profile is currently under review. You will be able to post and manage opportunities once your status is updated to "Approved".</p>
+                </div>
+            `;
+            orgHeader.after(banner);
+        }
+    }
+
     window.closePostModal = () => document.getElementById('post-modal').classList.remove('open');
 
     // Make these functions global so they can be called from HTML
@@ -438,6 +480,7 @@ async function initAdminDashboard(user, profile) {
     const nav = document.getElementById('sidebar-nav');
     nav.innerHTML = `
         <div class="nav-item active" onclick="switchSection('admin-dashboard', this)">📊 Admin Overview</div>
+        <div class="nav-item" onclick="window.location.href='admin.html'">🛡️ Admin Panel</div>
         <div class="nav-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
         <div class="nav-item" onclick="window.location.href='organizations.html'">🏢 All Organizations</div>
         <div class="nav-item" onclick="window.location.href='messages.html'">💬 Messages</div>
