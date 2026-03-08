@@ -146,11 +146,10 @@ async function refreshPendingOrgs() {
 }
 
 async function refreshOrgBadge() {
-    const { count: pendingCount } = await supabase
+    const { count: totalCount } = await supabase
         .from('organizations')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
-    document.getElementById('badge-orgs').textContent = pendingCount || 0;
+        .select('*', { count: 'exact', head: true });
+    document.getElementById('badge-orgs').textContent = totalCount || 0;
 }
 
 function renderPendingOrgsTable(pendingOrgs) {
