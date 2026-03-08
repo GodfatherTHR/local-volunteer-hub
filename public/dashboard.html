@@ -244,6 +244,25 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div class="glass-card" style="margin-top: 2rem;">
+                    <h3>My Participation History</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">A record of your
+                        volunteer hours and contributions.</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Opportunity</th>
+                                <th>Organization</th>
+                                <th>Hours</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vol-participation-list">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Organization Dashboard -->
@@ -284,6 +303,9 @@
 
                 <div class="glass-card">
                     <h3>Incoming Applications</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Review and
+                        approve/reject applications. Once approved, a participation record will be created
+                        automatically.</p>
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -294,6 +316,31 @@
                             </tr>
                         </thead>
                         <tbody id="org-applications-list">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Organization Participation Section -->
+            <div id="org-participation-dashboard" class="dashboard-section">
+                <header style="margin-bottom: 2rem;">
+                    <h2>📈 Participation Records</h2>
+                    <p style="color: var(--text-muted)">Manage and update volunteer hours for your opportunities.</p>
+                </header>
+
+                <div class="glass-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Volunteer</th>
+                                <th>Opportunity</th>
+                                <th>Hours</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="org-participation-list">
                             <!-- Populated via JS -->
                         </tbody>
                     </table>
@@ -479,6 +526,32 @@
                 <div style="margin-top: 2.5rem;">
                     <button type="submit" class="btn btn-primary w-100" style="padding: 1.1rem;">Save & Get
                         Started</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Participation Records Modal -->
+    <div class="modal" id="participation-modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <h2>📈 Adjust Volunteer Hours</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Current record for <span id="hours-volunteer-name"
+                    style="color: var(--primary); font-weight: 600;"></span></p>
+
+            <form id="participation-form">
+                <input type="hidden" id="record-id">
+                <input type="hidden" id="record-org-id">
+
+                <div class="form-group">
+                    <label>⏱ Hours Completed</label>
+                    <input type="number" id="hours-input" step="0.5" min="0" required placeholder="0.0">
+                </div>
+
+                <div
+                    style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border);">
+                    <button type="button" class="btn btn-secondary" onclick="closeParticipationModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="min-width: 120px;">Save
+                        Changes</button>
                 </div>
             </form>
         </div>

@@ -982,18 +982,45 @@
                                 <tr>
                                     <th>Volunteer</th>
                                     <th>Opportunity</th>
+                                    <th>Organization</th>
                                     <th>Hours</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-participation"></tbody>
+                            <tbody id="org-participation-list"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
         </main>
+    </div>
+
+    <!-- Participation Modal mirrors dashboard.html for organizations -->
+    <div class="detail-modal" id="participation-modal">
+        <div class="detail-modal-content" style="max-width: 450px;">
+            <h2>📈 Adjust Volunteer Hours</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Adjusting record for <span
+                    id="hours-volunteer-name" style="color: var(--primary); font-weight: 600;"></span></p>
+
+            <form id="participation-form">
+                <input type="hidden" id="record-id">
+                <input type="hidden" id="record-org-id">
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600;">⏱ Hours
+                        Completed</label>
+                    <input type="number" id="hours-input" step="0.5" min="0" required placeholder="0.0"
+                        style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); color: var(--text-main); outline: none;">
+                </div>
+
+                <div class="detail-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeParticipationModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Detail View Modal -->
@@ -1017,6 +1044,32 @@
                 <button class="btn btn-primary" id="confirm-ok"
                     style="background: #ef4444; border-color: #ef4444;">Proceed</button>
             </div>
+        </div>
+    </div>
+
+    <div class="detail-modal" id="participation-modal">
+        <div class="detail-modal-content" style="max-width: 450px;">
+            <h2>📈 Adjust Volunteer Hours</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Adjusting record for <span
+                    id="admin-hours-volunteer-name" style="color: var(--primary); font-weight: 600;"></span></p>
+
+            <form id="admin-participation-form">
+                <input type="hidden" id="admin-record-id">
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label
+                        style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">⏱
+                        Hours Completed</label>
+                    <input type="number" id="admin-hours-input" step="0.5" min="0" required placeholder="0.0"
+                        style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); color: var(--text-main); outline: none;">
+                </div>
+
+                <div class="detail-actions">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeAdminParticipationModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
 

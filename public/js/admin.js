@@ -67,6 +67,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 9. Set up search & filter listeners
     initSearchFilters();
 
+    // 10. Participation Form Handler (Mirrors Dashboard/Org logic)
+    const pForm = document.getElementById('participation-form');
+    if (pForm) {
+        pForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('record-id').value;
+            const hours = document.getElementById('hours-input').value;
+
+            const { error } = await supabase
+                .from('participation_records')
+                .update({ hours_completed: parseFloat(hours) })
+                .eq('id', id);
+
+            if (error) {
+                showToast('Error updating hours: ' + error.message, 'error');
+            } else {
+                showToast('Hours updated successfully!', 'success');
+                closeParticipationModal();
+                loadedSections.delete('participation');
+                await loadParticipation();
+                await loadOverview();
+            }
+        };
+    }
+
+    // Modal backdrop close
+    const pModal = document.getElementById('participation-modal');
+    if (pModal) {
+        pModal.addEventListener('click', (e) => {
+            if (e.target.id === 'participation-modal') closeParticipationModal();
+        });
+    }
+
     console.log('🛡️ Admin Panel Initialized');
 });
 
@@ -286,7 +319,8 @@ function filterData(type) {
             return allParticipation.filter(p => {
                 return !q ||
                     (p.users?.full_name || '').toLowerCase().includes(q) ||
-                    (p.opportunities?.title || '').toLowerCase().includes(q);
+                    (p.opportunities?.title || '').toLowerCase().includes(q) ||
+                    (p.opportunities?.organizations?.organization_name || '').toLowerCase().includes(q);
             });
         }
     }
@@ -895,51 +929,112 @@ window.adminDeleteNotif = async (notifId) => {
 // ═══════════════════════════════════════
 
 async function loadParticipation() {
-    const { data, error } = await supabase
+    const list = document.getElementById('org-participation-list');
+    list.innerHTML = '<tr><td colspan="6" class="text-center">Loading...</td></tr>';
+
+    // 1. Backfill records for approved applications (incase trigger didn't exist for old ones)
+    try {
+        const { data: approvedApps } = await supabase
+            .from('applications')
+            .select('opportunity_id, volunteer_id, applied_at')
+            .eq('status', 'approved');
+
+        if (approvedApps && approvedApps.length > 0) {
+            const { data: existingP } = await supabase.from('participation_records').select('opportunity_id, volunteer_id');
+            const existingKeys = new Set(existingP?.map(p => `${p.opportunity_id}_${p.volunteer_id}`) || []);
+
+            const missing = approvedApps.filter(app => !existingKeys.has(`${app.opportunity_id}_${app.volunteer_id}`));
+
+            if (missing.length > 0) {
+                const backfills = missing.map(app => ({
+                    opportunity_id: app.opportunity_id,
+                    volunteer_id: app.volunteer_id,
+                    hours_completed: 0,
+                    participation_date: app.applied_at || new Date().toISOString()
+                }));
+                const { error: insertError } = await supabase.from('participation_records').insert(backfills);
+                if (insertError) {
+                    console.warn('⚠️ Participation backfill failed (permissions?):', insertError.message);
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Backfill logic error:', e);
+    }
+
+    // 2. Fetch all records
+    const { data: records, error } = await supabase
         .from('participation_records')
         .select(`
             *,
             users:volunteer_id(full_name, email),
-            opportunities:opportunity_id(title)
+            opportunities:opportunity_id(
+                title,
+                organizations(organization_name)
+            )
         `)
         .order('created_at', { ascending: false });
 
-    if (error) { showToast('Error loading participation records', 'error'); return; }
-    allParticipation = data || [];
+    if (error) {
+        console.error('Error fetching participation:', error);
+        list.innerHTML = '<tr><td colspan="6" class="text-center">Error loading records.</td></tr>';
+        return;
+    }
+
+    allParticipation = records || [];
     renderParticipation(allParticipation);
 }
 
 function renderParticipation(records) {
-    const tbody = document.getElementById('table-participation');
+    const list = document.getElementById('org-participation-list');
     if (!records || records.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="icon">📈</div>No participation records found</div></td></tr>';
+        list.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="icon">📈</div>No participation records found</div></td></tr>';
         return;
     }
-    tbody.innerHTML = records.map(r => `
+
+    list.innerHTML = records.map(r => `
         <tr>
             <td>
-                <div style="font-weight:500">${esc(r.users?.full_name || '—')}</div>
-                <div style="font-size:0.75rem; color:var(--text-muted)">${esc(r.users?.email || '')}</div>
+                <div style="font-weight:500">${esc(r.users?.full_name || 'Volunteer')}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted)">${esc(r.users?.email || '')}</div>
             </td>
-            <td>${esc(r.opportunities?.title || '—')}</td>
-            <td style="font-weight:700; color:var(--primary-light)">${r.hours_completed ?? '—'} hrs</td>
+            <td>${esc(r.opportunities?.title || 'Unknown')}</td>
+            <td>${esc(r.opportunities?.organizations?.organization_name || '—')}</td>
+            <td style="font-weight:700; color: var(--primary-light)">${r.hours_completed || 0} hrs</td>
             <td>${r.participation_date ? formatDate(r.participation_date) : '—'}</td>
             <td>
                 <div class="action-group">
-                    <button class="btn-action btn-delete" onclick="adminDeleteParticipation('${r.id}')">🗑</button>
+                    <button class="btn-action btn-view" onclick="updateOrgParticipationHours('${r.id}', '${r.hours_completed || 0}', '${r.users?.full_name || 'Volunteer'}')">✎ Edit</button>
+                    <button class="btn-action btn-delete" onclick="adminDeleteParticipation('${r.id}')">🗑 Delete</button>
                 </div>
             </td>
         </tr>
     `).join('');
 }
 
-window.adminDeleteParticipation = async (recordId) => {
+window.updateOrgParticipationHours = async function (recordId, currentHours, volunteerName) {
+    document.getElementById('record-id').value = recordId;
+    document.getElementById('hours-input').value = currentHours;
+    document.getElementById('hours-volunteer-name').textContent = volunteerName;
+    document.getElementById('participation-modal').classList.add('open');
+};
+
+window.closeParticipationModal = () => document.getElementById('participation-modal').classList.remove('open');
+
+async function adminDeleteParticipation(recordId) {
     const isConfirmed = await confirmCustom('Delete Record', 'Delete this participation record?');
     if (!isConfirmed) return;
+
     const { error } = await supabase.from('participation_records').delete().eq('id', recordId);
-    if (error) { showToast('Error: ' + error.message, 'error'); }
-    else { showToast('Record deleted', 'success'); loadedSections.delete('participation'); await loadParticipation(); await loadOverview(); }
-};
+    if (error) {
+        showToast('Error: ' + error.message, 'error');
+    } else {
+        showToast('Record deleted successfully.', 'success');
+        loadedSections.delete('participation');
+        await loadParticipation();
+        await loadOverview();
+    }
+}
 
 
 // ═══════════════════════════════════════
@@ -1050,5 +1145,7 @@ window.adminCloseOpp = adminCloseOpp;
 window.adminDeleteApp = adminDeleteApp;
 window.adminDeleteNotif = adminDeleteNotif;
 window.adminDeleteParticipation = adminDeleteParticipation;
+window.updateOrgParticipationHours = updateOrgParticipationHours;
+window.closeParticipationModal = closeParticipationModal;
 window.adminDeleteOpp = adminDeleteOpp;
 window.adminDeleteOrg = adminDeleteOrg;

@@ -72,8 +72,8 @@ async function initVolunteerDashboard(user, profile) {
     if (apps && apps.length > 0) {
         list.innerHTML = apps.map(app => `
             <tr>
-                <td>${app.opportunities.title}</td>
-                <td>${app.opportunities.organizations?.organization_name || 'N/A'}</td>
+                <td>${app.opportunities?.title || 'N/A'}</td>
+                <td>${app.opportunities?.organizations?.organization_name || 'N/A'}</td>
                 <td>${new Date(app.applied_at).toLocaleDateString()}</td>
                 <td><span class="status-badge status-${app.status}">${app.status}</span></td>
             </tr>
@@ -81,19 +81,45 @@ async function initVolunteerDashboard(user, profile) {
     } else {
         list.innerHTML = '<tr><td colspan="4" class="text-center">No active applications.</td></tr>';
     }
+
+    // Fetch Participation Records
+    const { data: participations, error: pError } = await supabase
+        .from('participation_records')
+        .select(`
+            *,
+            opportunities (
+                title,
+                organizations (organization_name)
+            )
+        `)
+        .eq('volunteer_id', user.id)
+        .order('participation_date', { ascending: false });
+
+    const pList = document.getElementById('vol-participation-list');
+
+    // Calculate Total Hours
+    let totalHours = 0;
+    if (participations) {
+        totalHours = participations.reduce((sum, record) => sum + (parseFloat(record.hours_completed) || 0), 0);
+    }
+    document.getElementById('vol-hours').textContent = totalHours.toFixed(1);
+
+    if (participations && participations.length > 0) {
+        pList.innerHTML = participations.map(p => `
+            <tr>
+                <td>${p.opportunities?.title || 'Unknown'}</td>
+                <td>${p.opportunities?.organizations?.organization_name || 'Unknown'}</td>
+                <td>${p.hours_completed || 0} hrs</td>
+                <td>${p.participation_date ? new Date(p.participation_date).toLocaleDateString() : '—'}</td>
+            </tr>
+        `).join('');
+    } else {
+        pList.innerHTML = '<tr><td colspan="4" class="text-center">No participation records found.</td></tr>';
+    }
 }
 
 async function initOrgDashboard(user, profile) {
     document.getElementById('org-dashboard').classList.add('active');
-
-    // Sidebar
-    const nav = document.getElementById('sidebar-nav');
-    nav.innerHTML = `
-        <div class="nav-item active" onclick="switchSection('org-dashboard', this)">📊 Overview</div>
-        <div class="nav-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
-        <div class="nav-item" onclick="window.location.href='messages.html'">💬 Messages</div>
-        <div class="nav-item" onclick="switchSection('notifications-dashboard', this); loadNotifications('${user.id}')">🔔 Notifications</div>
-    `;
 
     // Check Org Profile
     let { data: orgData } = await supabase.from('organizations').select('*').eq('user_id', user.id).single();
@@ -125,6 +151,16 @@ async function initOrgDashboard(user, profile) {
         };
         return; // Stop loading dashboard until profile created
     }
+
+    // Sidebar (Update with Participation link now that we have orgData)
+    const nav = document.getElementById('sidebar-nav');
+    nav.innerHTML = `
+        <div class="nav-item active" onclick="switchSection('org-dashboard', this)">📊 Overview</div>
+        <div class="nav-item" onclick="switchSection('org-participation-dashboard', this); loadOrgParticipation('${orgData.id}')">📈 Participation</div>
+        <div class="nav-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
+        <div class="nav-item" onclick="window.location.href='messages.html'">💬 Messages</div>
+        <div class="nav-item" onclick="switchSection('notifications-dashboard', this); loadNotifications('${user.id}')">🔔 Notifications</div>
+    `;
 
     // Check Organization Status for Posting
     const postBtn = document.getElementById('create-post-btn');
@@ -692,4 +728,132 @@ async function loadAdminOpps() {
     } else {
         list.innerHTML = '<tr><td colspan="4" class="text-center">No active opportunities.</td></tr>';
     }
+}
+
+// ═══════════════════════════════════════
+//  Organization Participation Records
+// ═══════════════════════════════════════
+
+window.loadOrgParticipation = async function (orgId) {
+    const list = document.getElementById('org-participation-list');
+    list.innerHTML = '<tr><td colspan="5" class="text-center">Loading...</td></tr>';
+
+    // 1. Get opportunities for this org
+    const { data: opps } = await supabase
+        .from('opportunities')
+        .select('id')
+        .eq('organization_id', orgId);
+
+    if (!opps || opps.length === 0) {
+        list.innerHTML = '<tr><td colspan="5" class="text-center">No participation records found.</td></tr>';
+        return;
+    }
+
+    const oppIds = opps.map(o => o.id);
+
+    // 2. Fetch records
+    const { data: records, error } = await supabase
+        .from('participation_records')
+        .select(`
+            *,
+            users:volunteer_id(full_name, email),
+            opportunities:opportunity_id(title)
+        `)
+        .in('opportunity_id', oppIds)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching participation:', error);
+        list.innerHTML = '<tr><td colspan="5" class="text-center">Error loading records.</td></tr>';
+        return;
+    }
+
+    if (records && records.length > 0) {
+        list.innerHTML = records.map(r => `
+            <tr>
+                <td>
+                    <div style="font-weight:500">${esc(r.users?.full_name || 'Volunteer')}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted)">${esc(r.users?.email || '')}</div>
+                </td>
+                <td>${esc(r.opportunities?.title || 'Unknown')}</td>
+                <td style="font-weight:700; color: var(--primary)">${r.hours_completed || 0} hrs</td>
+                <td>${r.participation_date ? new Date(r.participation_date).toLocaleDateString() : '—'}</td>
+                <td>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button class="btn btn-sm btn-secondary" onclick="updateOrgParticipationHours('${r.id}', '${r.hours_completed || 0}', '${orgId}', '${esc(r.users?.full_name || 'Volunteer')}')">Edit Hours</button>
+                        <button class="btn btn-sm btn-secondary" style="color:#ef4444; border-color: rgba(239, 68, 68, 0.5);" onclick="deleteOrgParticipation('${r.id}', '${orgId}')">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    } else {
+        list.innerHTML = '<tr><td colspan="5" class="text-center">No participation records found.</td></tr>';
+    }
+};
+
+window.updateOrgParticipationHours = async function (recordId, currentHours, orgId, volunteerName) {
+    document.getElementById('record-id').value = recordId;
+    document.getElementById('record-org-id').value = orgId;
+    document.getElementById('hours-input').value = currentHours;
+    document.getElementById('hours-volunteer-name').textContent = volunteerName;
+    document.getElementById('participation-modal').classList.add('open');
+};
+
+window.closeParticipationModal = () => document.getElementById('participation-modal').classList.remove('open');
+
+// Participation Form Handler
+document.addEventListener('DOMContentLoaded', () => {
+    const pForm = document.getElementById('participation-form');
+    if (pForm) {
+        pForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('record-id').value;
+            const orgId = document.getElementById('record-org-id').value;
+            const hours = document.getElementById('hours-input').value;
+
+            const { error } = await supabase
+                .from('participation_records')
+                .update({ hours_completed: parseFloat(hours) })
+                .eq('id', id);
+
+            if (error) {
+                alert('Error updating hours: ' + error.message);
+            } else {
+                alert('Hours updated successfully!');
+                closeParticipationModal();
+                loadOrgParticipation(orgId);
+            }
+        };
+    }
+
+    // Modal backdrop close
+    const pModal = document.getElementById('participation-modal');
+    if (pModal) {
+        pModal.addEventListener('click', (e) => {
+            if (e.target.id === 'participation-modal') closeParticipationModal();
+        });
+    }
+});
+
+window.deleteOrgParticipation = async function (recordId, orgId) {
+    if (!confirm('Are you sure you want to delete this participation record?')) return;
+
+    const { error } = await supabase
+        .from('participation_records')
+        .delete()
+        .eq('id', recordId);
+
+    if (error) {
+        alert('Error deleting record: ' + error.message);
+    } else {
+        alert('Record deleted successfully.');
+        loadOrgParticipation(orgId);
+    }
+};
+
+function esc(str) {
+    if (str === null || str === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
 }
