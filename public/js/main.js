@@ -81,6 +81,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             slides[currentSlide].classList.remove('active');
             currentSlide = (currentSlide + 1) % slides.length;
             slides[currentSlide].classList.add('active');
-        }, 5000); // Change image every 3 seconds
+        }, 5000); // Change image every 5 seconds
     }
 });
