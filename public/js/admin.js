@@ -932,37 +932,7 @@ async function loadParticipation() {
     const list = document.getElementById('org-participation-list');
     list.innerHTML = '<tr><td colspan="6" class="text-center">Loading...</td></tr>';
 
-    // 1. Backfill records for approved applications (incase trigger didn't exist for old ones)
-    try {
-        const { data: approvedApps } = await supabase
-            .from('applications')
-            .select('opportunity_id, volunteer_id, applied_at')
-            .eq('status', 'approved');
-
-        if (approvedApps && approvedApps.length > 0) {
-            const { data: existingP } = await supabase.from('participation_records').select('opportunity_id, volunteer_id');
-            const existingKeys = new Set(existingP?.map(p => `${p.opportunity_id}_${p.volunteer_id}`) || []);
-
-            const missing = approvedApps.filter(app => !existingKeys.has(`${app.opportunity_id}_${app.volunteer_id}`));
-
-            if (missing.length > 0) {
-                const backfills = missing.map(app => ({
-                    opportunity_id: app.opportunity_id,
-                    volunteer_id: app.volunteer_id,
-                    hours_completed: 0,
-                    participation_date: app.applied_at || new Date().toISOString()
-                }));
-                const { error: insertError } = await supabase.from('participation_records').insert(backfills);
-                if (insertError) {
-                    console.warn('⚠️ Participation backfill failed (permissions?):', insertError.message);
-                }
-            }
-        }
-    } catch (e) {
-        console.error('Backfill logic error:', e);
-    }
-
-    // 2. Fetch all records
+    // Fetch all records
     const { data: records, error } = await supabase
         .from('participation_records')
         .select(`
@@ -1022,9 +992,10 @@ window.updateOrgParticipationHours = async function (recordId, currentHours, vol
 window.closeParticipationModal = () => document.getElementById('participation-modal').classList.remove('open');
 
 async function adminDeleteParticipation(recordId) {
-    const isConfirmed = await confirmCustom('Delete Record', 'Delete this participation record?');
+    const isConfirmed = await confirmCustom('Delete Record', 'Are you sure you want to delete this participation record?');
     if (!isConfirmed) return;
 
+    showToast('Deleting...', 'info');
     const { error } = await supabase.from('participation_records').delete().eq('id', recordId);
     if (error) {
         showToast('Error: ' + error.message, 'error');
@@ -1033,6 +1004,45 @@ async function adminDeleteParticipation(recordId) {
         loadedSections.delete('participation');
         await loadParticipation();
         await loadOverview();
+    }
+}
+
+// Manual Sync/Backfill for admins if they notice missing records from old approvals
+window.adminSyncParticipationRecords = async () => {
+    try {
+        showToast('Syncing records... please wait', 'info');
+        const { data: approvedApps } = await supabase
+            .from('applications')
+            .select('opportunity_id, volunteer_id, applied_at')
+            .eq('status', 'approved');
+
+        if (!approvedApps || approvedApps.length === 0) {
+            showToast('No approved applications found to sync.', 'info');
+            return;
+        }
+
+        const { data: existingP } = await supabase.from('participation_records').select('opportunity_id, volunteer_id');
+        const existingKeys = new Set(existingP?.map(p => `${p.opportunity_id}_${p.volunteer_id}`) || []);
+
+        const missing = approvedApps.filter(app => !existingKeys.has(`${app.opportunity_id}_${app.volunteer_id}`));
+
+        if (missing.length > 0) {
+            const backfills = missing.map(app => ({
+                opportunity_id: app.opportunity_id,
+                volunteer_id: app.volunteer_id,
+                hours_completed: 0,
+                participation_date: app.applied_at || new Date().toISOString()
+            }));
+            const { error: insertError } = await supabase.from('participation_records').insert(backfills);
+            if (insertError) throw insertError;
+            showToast(`Sync complete: Added ${missing.length} missing records.`, 'success');
+        } else {
+            showToast('All records are already in sync.', 'success');
+        }
+        loadedSections.delete('participation');
+        await loadParticipation();
+    } catch (err) {
+        showToast('Sync failed: ' + err.message, 'error');
     }
 }
 
@@ -1145,6 +1155,7 @@ window.adminCloseOpp = adminCloseOpp;
 window.adminDeleteApp = adminDeleteApp;
 window.adminDeleteNotif = adminDeleteNotif;
 window.adminDeleteParticipation = adminDeleteParticipation;
+window.adminSyncParticipationRecords = adminSyncParticipationRecords;
 window.updateOrgParticipationHours = updateOrgParticipationHours;
 window.closeParticipationModal = closeParticipationModal;
 window.adminDeleteOpp = adminDeleteOpp;
