@@ -15,8 +15,9 @@
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
 
-    <!-- Supabase CDN -->
+    <!-- Supabase & FontAwesome -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 
 <body>
@@ -44,13 +45,13 @@
     <header class="hero">
         <div class="hero-slider" id="hero-slider">
             <div class="slide active"
-                style="background-image: linear-gradient(rgba(15, 23, 42, 0.4), rgba(2, 6, 23, 0.6)), url('images/team/volunteer1.png');">
+                style="background-image: url('images/team/volunteer1.png');">
             </div>
             <div class="slide"
-                style="background-image: linear-gradient(rgba(15, 23, 42, 0.4), rgba(2, 6, 23, 0.6)), url('images/team/volunteer2.png');">
+                style="background-image: url('images/team/volunteer2.png');">
             </div>
             <div class="slide"
-                style="background-image: linear-gradient(rgba(15, 23, 42, 0.4), rgba(2, 6, 23, 0.6)), url('images/team/volunteer3.png');">
+                style="background-image: url('images/team/volunteer3.png');">
             </div>
         </div>
         <div class="container hero-content">
@@ -64,15 +65,26 @@
 
             <div class="hero-stats glass">
                 <div class="stat-item">
-                    <span class="stat-number">500+</span>
+                    <i class="fas fa-users-viewfinder stat-icon"></i>
+                    <div class="stat-number-wrapper">
+                        <span class="stat-number counter" data-target="500">0</span><span class="stat-suffix">+</span>
+                    </div>
                     <span class="stat-label">Active Volunteers</span>
                 </div>
+                <div class="stat-divider"></div>
                 <div class="stat-item">
-                    <span class="stat-number">120+</span>
+                    <i class="fas fa-building-circle-check stat-icon"></i>
+                    <div class="stat-number-wrapper">
+                        <span class="stat-number counter" data-target="120">0</span><span class="stat-suffix">+</span>
+                    </div>
                     <span class="stat-label">Organizations</span>
                 </div>
+                <div class="stat-divider"></div>
                 <div class="stat-item">
-                    <span class="stat-number">15k+</span>
+                    <i class="fas fa-clock-rotate-left stat-icon"></i>
+                    <div class="stat-number-wrapper">
+                        <span class="stat-number counter" data-target="15">0</span><span class="stat-suffix">k+</span>
+                    </div>
                     <span class="stat-label">Hours Served</span>
                 </div>
             </div>
@@ -203,32 +215,43 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <a href="/" class="logo" style="font-size: 1.75rem;">
+                    <a href="/" class="logo">
                         <img src="images/team/logo.png" alt="VolunteerHub Logo" class="logo-img">
                         Volunteer<span class="highlight">Hub</span>
                     </a>
                     <p style="color: var(--text-muted); margin-top: 1.5rem; line-height: 1.8; max-width: 350px;">
-                        A professional platform designed for efficient coordination between volunteers and non-profit
-                        organizations.
+                        Empowering communities through digital coordination. Join thousands of volunteers making a real difference in their local neighborhoods.
                     </p>
                 </div>
                 <div class="link-group">
                     <h4>Platform</h4>
                     <a href="opportunities.html">Browse Opportunities</a>
-                    <a href="organizations.html">Our Partners</a>
-                    <a href="#">Security Guidelines</a>
-                    <a href="#">Help Center</a>
+                    <a href="organizations.html">Partner Organizations</a>
+                    <a href="#">Impact Tracking</a>
+                    <a href="#">Success Stories</a>
                 </div>
                 <div class="link-group">
                     <h4>Community</h4>
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Success Stories</a>
                     <a href="#">Volunteer Portal</a>
-                    <a href="#">Contact Support</a>
+                    <a href="#">Security Guidelines</a>
+                    <a href="#">Help Center</a>
+                    <a href="#">Privacy Policy</a>
+                </div>
+                <div class="link-group">
+                    <h4>Connect</h4>
+                    <a href="mailto:support@volunteerhub.com">support@volunteerhub.com</a>
+                    <a href="tel:+1234567890">+880 1234 567 890</a>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 1rem;">Dhaka, Bangladesh</p>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 VolunteerHub. Developed by CSE Team - IUS. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook" class="social-fb"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter" class="social-tw"><i class="fab fa-x-twitter"></i></a>
+                    <a href="#" aria-label="Instagram" class="social-ig"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="LinkedIn" class="social-ln"><i class="fab fa-linkedin-in"></i></a>
+                </div>
             </div>
         </div>
     </footer>
